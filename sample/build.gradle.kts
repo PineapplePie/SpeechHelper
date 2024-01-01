@@ -36,5 +36,6 @@ dependencies {
 
     implementation("androidx.core:core-ktx:${Dependencies.coreVersion}")
     implementation("androidx.appcompat:appcompat:${Dependencies.compatVersion}")
+    implementation("com.google.android.material:material:${Dependencies.materialVersion}")
     testImplementation("junit:junit:${Dependencies.jUnitVersion}")
 }

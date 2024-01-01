@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TextToSpeechHelper"
+rootProject.name = "SpeechHelper"
 include(":speechhelper")
 include(":sample")

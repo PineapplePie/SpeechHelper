@@ -10,6 +10,8 @@ object Dependencies {
 
     const val coreVersion = "1.12.0"
 
+    const val materialVersion = "1.11.0"
+
     const val compatVersion = "1.6.1"
 
     const val jUnitVersion = "4.13.2"
