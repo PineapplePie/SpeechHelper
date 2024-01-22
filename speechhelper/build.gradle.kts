@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.application")
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
 }
 
@@ -8,11 +8,7 @@ android {
     compileSdk = Dependencies.maxSdkVersion
 
     defaultConfig {
-        applicationId = Dependencies.libId
         minSdk = Dependencies.minSdkVersion
-        targetSdk = Dependencies.maxSdkVersion
-        versionCode = Dependencies.versionCode
-        versionName = Dependencies.versionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

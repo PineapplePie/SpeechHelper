@@ -17,6 +17,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -33,9 +37,11 @@ android {
 }
 
 dependencies {
+    implementation(project(":speechhelper"))
 
     implementation("androidx.core:core-ktx:${Dependencies.coreVersion}")
     implementation("androidx.appcompat:appcompat:${Dependencies.compatVersion}")
     implementation("com.google.android.material:material:${Dependencies.materialVersion}")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:${Dependencies.lifecycleVersion}")
     testImplementation("junit:junit:${Dependencies.jUnitVersion}")
 }

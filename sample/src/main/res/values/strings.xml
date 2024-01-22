@@ -1,3 +1,10 @@
 <resources>
-	<string name="app_name">sample</string>
+	<string name="app_name">SpeechHelper sample</string>
+
+	<string name="sample_input_hint">Type your text here…</string>
+	<string name="sample_pause_button_text">Pause</string>
+	<string name="sample_resume_button_text">Resume</string>
+	<string name="sample_read_button_text">Read from start</string>
+	<string name="sample_warning_toast_text">Input shouldn\'t be empty</string>
+	<string name="sample_status_text_formatted">Speaking status is:</string>
 </resources>
