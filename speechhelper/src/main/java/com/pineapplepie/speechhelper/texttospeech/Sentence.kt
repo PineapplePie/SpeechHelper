@@ -1,3 +1,5 @@
 package com.pineapplepie.speechhelper.texttospeech
 
-internal data class Sentence(val text: String, val utteranceId: String)
+import java.util.UUID
+
+internal data class Sentence(val text: String, val utteranceId: String = UUID.randomUUID().toString())

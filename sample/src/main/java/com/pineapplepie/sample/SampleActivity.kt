@@ -10,9 +10,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.pineapplepie.sample.databinding.ActivitySampleBinding
 import com.pineapplepie.speechhelper.texttospeech.TextToSpeechManager
+import com.pineapplepie.speechhelper.texttospeech.state.InitializationState
 import com.pineapplepie.speechhelper.texttospeech.state.SpeakingState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class SampleActivity : AppCompatActivity() {
 
@@ -31,6 +33,13 @@ class SampleActivity : AppCompatActivity() {
 
     private fun setupTextToSpeech() {
         textToSpeechManager = TextToSpeechManager(this)
+        textToSpeechManager.initializationState.observe { state ->
+            if (state is InitializationState.Success) {
+                binding.inputText.setText(getString(R.string.sample_random_text))
+                textToSpeechManager.setLanguage(Locale.ENGLISH)
+            }
+        }
+
         textToSpeechManager.speakingStatus.observe { status ->
             binding.statusText.text = SpannableStringBuilder()
                 .append(getString(R.string.sample_status_text_formatted))
@@ -49,12 +58,8 @@ class SampleActivity : AppCompatActivity() {
         pauseButton.setOnClickListener { onPauseClicked() }
     }
 
-    private fun onPauseClicked() {
-        if (textToSpeechManager.isPaused()) {
-            textToSpeechManager.play()
-        } else {
-            textToSpeechManager.pause()
-        }
+    private fun onPauseClicked() = with(textToSpeechManager) {
+        if (isPaused()) play() else pause()
     }
 
     private fun readText() {

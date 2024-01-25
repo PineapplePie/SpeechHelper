@@ -8,9 +8,6 @@ import android.util.Log
 import com.pineapplepie.speechhelper.texttospeech.audiofocus.AudioFocusManager
 import com.pineapplepie.speechhelper.texttospeech.state.InitializationState
 import com.pineapplepie.speechhelper.texttospeech.state.SpeakingState
-import com.pineapplepie.speechhelper.texttospeech.util.GENERAL_TTS_ERROR
-import com.pineapplepie.speechhelper.texttospeech.util.NO_ENGINES_AVAILABLE_ERROR
-import com.pineapplepie.speechhelper.texttospeech.util.SENTENCE_SEPARATORS
 import com.pineapplepie.speechhelper.texttospeech.util.addUtteranceListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +26,8 @@ class TextToSpeechManager {
     private val _speakingStatus = MutableStateFlow<SpeakingState>(SpeakingState.None)
     val speakingStatus: StateFlow<SpeakingState> = _speakingStatus
 
-    private var initializationState: InitializationState = InitializationState.None
+    private val _initializationState = MutableStateFlow<InitializationState>(InitializationState.None)
+    val initializationState: StateFlow<InitializationState> = _initializationState
 
     private val sentenceQueue: ArrayDeque<Sentence> = ArrayDeque()
 
@@ -41,18 +39,19 @@ class TextToSpeechManager {
             "Text-to-speech object should be already initialized!"
         }
 
-    fun setText(text: String) {
-        if (!checkIfInitialized()) return
+    fun setText(text: String): Boolean {
+        if (!checkIfInitialized()) return false
         val sentences = text.split(*SENTENCE_SEPARATORS).filter { it.isNotBlank() }
         sentenceQueue.clear()
-        sentenceQueue.addAll(sentences.map { Sentence(it, it.hashCode().toString()) })
+        return sentenceQueue.addAll(sentences.map { Sentence(it) })
     }
 
-    fun setLanguage(locale: Locale) {
-        if (!checkIfInitialized()) return
+    fun setLanguage(locale: Locale): Boolean {
+        if (!checkIfInitialized()) return false
         val status = textToSpeech.isLanguageAvailable(locale)
         val isAvailable = status != TextToSpeech.LANG_NOT_SUPPORTED && status != TextToSpeech.LANG_MISSING_DATA
         if (isAvailable) textToSpeech.language = locale
+        return isAvailable
     }
 
     fun play() {
@@ -65,7 +64,7 @@ class TextToSpeechManager {
         if (!checkIfInitialized()) return
         if (textToSpeech.isSpeaking) {
             textToSpeech.stop()
-            requestAudioFocus()
+            abandonAudioFocus()
             _speakingStatus.tryEmit(SpeakingState.Paused)
         }
     }
@@ -80,6 +79,8 @@ class TextToSpeechManager {
         return speakingStatus.value is SpeakingState.Paused
     }
 
+    fun isInitialized(): Boolean = checkIfInitialized()
+
     fun release() {
         if (!checkIfInitialized()) return
         if (textToSpeech.isSpeaking) textToSpeech.stop()
@@ -93,9 +94,8 @@ class TextToSpeechManager {
         if (_textToSpeech != null) return
         audioFocusManager = AudioFocusManager(context.getSystemService(AUDIO_SERVICE) as AudioManager) { pause() }
         _textToSpeech = TextToSpeechFactory.createTextToSpeech(context, enginePackageName) {
-            this.initializationState = it
+            _initializationState.tryEmit(InitializationState.Success)
             if (it is InitializationState.Success) {
-                setLanguage(Locale.getDefault())
                 listenToProgress()
                 requestAudioFocus()
             } else {
@@ -143,8 +143,13 @@ class TextToSpeechManager {
             false
         }
 
-        initializationState is InitializationState.Error -> {
+        initializationState.value is InitializationState.Error -> {
             Log.e(TAG, "TTS initialization has failed with error: ${retrieveErrorMessage()}")
+            false
+        }
+
+        initializationState.value is InitializationState.None -> {
+            Log.e(TAG, "TTS is not initialized yet, please wait for the callback")
             false
         }
 
@@ -159,3 +164,7 @@ class TextToSpeechManager {
 }
 
 private val TAG = TextToSpeechManager::class.java.simpleName
+
+internal val SENTENCE_SEPARATORS = arrayOf(".", ",", "?", "!", "¿", "¡")
+internal const val NO_ENGINES_AVAILABLE_ERROR = "No engines available, you need to install a TTS app"
+internal const val GENERAL_TTS_ERROR = "General initialization error"

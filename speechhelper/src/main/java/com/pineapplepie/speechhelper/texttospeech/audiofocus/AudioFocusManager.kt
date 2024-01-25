@@ -5,9 +5,7 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
-import com.pineapplepie.speechhelper.texttospeech.util.AUDIOFOCUS_NONE
 import com.pineapplepie.speechhelper.texttospeech.util.Action
-import com.pineapplepie.speechhelper.texttospeech.util.lostFocusStates
 
 internal class AudioFocusManager(
     private val audioManager: AudioManager,
@@ -17,6 +15,7 @@ internal class AudioFocusManager(
     private var currentAudioFocus = AUDIOFOCUS_NONE
 
     private val audioFocusListener = AudioManager.OnAudioFocusChangeListener { focus ->
+        currentAudioFocus = focus
         if (focus in lostFocusStates) focusLostCallback()
     }
 
@@ -28,7 +27,7 @@ internal class AudioFocusManager(
             .setLegacyStreamType(AudioAttributes.USAGE_MEDIA)
             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
             .build()
-        return@lazy AudioFocusRequest.Builder(focus)
+        AudioFocusRequest.Builder(focus)
             .setAudioAttributes(audioAttributes)
             .setOnAudioFocusChangeListener(audioFocusListener)
             .build()
@@ -40,7 +39,7 @@ internal class AudioFocusManager(
             audioManager.requestAudioFocus(audioFocusRequest)
         } else {
             audioManager.requestAudioFocus(
-                null,
+                audioFocusListener,
                 AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
             )
@@ -51,7 +50,14 @@ internal class AudioFocusManager(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioManager.abandonAudioFocusRequest(audioFocusRequest)
         } else {
-            audioManager.abandonAudioFocus { }
+            audioManager.abandonAudioFocus(audioFocusListener)
         }
     }
 }
+
+internal val lostFocusStates = arrayOf(
+    AudioManager.AUDIOFOCUS_LOSS,
+    AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+    AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK,
+)
+internal const val AUDIOFOCUS_NONE = -1

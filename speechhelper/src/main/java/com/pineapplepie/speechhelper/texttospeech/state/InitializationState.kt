@@ -1,6 +1,6 @@
 package com.pineapplepie.speechhelper.texttospeech.state
 
-internal sealed class InitializationState {
+sealed class InitializationState {
 
     data object None : InitializationState()
 
