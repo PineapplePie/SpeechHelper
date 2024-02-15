@@ -4,7 +4,7 @@ object Dependencies {
 
     const val maxSdkVersion = 34
 
-    const val jvmTarget = "11"
+    const val jvmTarget = "17"
 
     // kotlin
 
@@ -31,6 +31,12 @@ object Dependencies {
     const val versionCode = 1
 
     const val versionName = "0.1"
+
+    const val libVersionName = "1.0.0rc"
+
+    const val libArtifact = "SpeechHelper"
+
+    const val groupId = "com.github.PineapplePie"
 
     const val libId = "com.pineapplepie.speechhelper"
 
